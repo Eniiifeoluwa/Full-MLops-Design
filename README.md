@@ -1,4 +1,4 @@
-# ML Inference Service - MLOps Take-Home Exercise
+# ML Inference Service - MLOps
 
 A production-ready machine learning inference system designed for Kubernetes deployment.
 
