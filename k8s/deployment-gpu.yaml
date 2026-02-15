@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-inference-service-gpu
+  labels:
+    app: ml-inference
+    component: api-gpu
+    version: v1.0.0
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ml-inference
+      component: api-gpu
+  template:
+    metadata:
+      labels:
+        app: ml-inference
+        component: api-gpu
+        version: v1.0.0
+    spec:
+      # Node selector for GPU nodes
+      nodeSelector:
+        accelerator: nvidia-tesla-t4
+      
+      # Tolerations for GPU taints
+      tolerations:
+      - key: "nvidia.com/gpu"
+        operator: "Equal"
+        value: "present"
+        effect: "NoSchedule"
+      
+      containers:
+      - name: inference-api
+        image: ml-inference-service-gpu:1.0.0
+        
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 4Gi
+            nvidia.com/gpu: 1  # Request 1 GPU
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+            nvidia.com/gpu: 1  # Limit to 1 GPU
+        
+        env:
+        - name: NVIDIA_VISIBLE_DEVICES
+          value: "all"
+        - name: CUDA_VISIBLE_DEVICES
+          value: "0"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 5

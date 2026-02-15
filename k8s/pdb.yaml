@@ -1,0 +1,12 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ml-inference-pdb
+  labels:
+    app: ml-inference
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: ml-inference
+      component: api
